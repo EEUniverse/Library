@@ -36,7 +36,6 @@ namespace EEUniverse.Library
                     throw new ArgumentNullException($"{nameof(worldId)} should not be null or empty when the scope is world.");
 
                 Send(new Message(ConnectionScope.Lobby, 0, "world", worldId));
-                Send(new Message(ConnectionScope.World, 0, 0));
             }
         }
 
