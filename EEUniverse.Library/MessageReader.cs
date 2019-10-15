@@ -26,13 +26,18 @@ namespace EEUniverse.Library
         [MethodImpl(Inlining)]
 		public bool IsDataLeft() => _i < _data.Length;
 
+        // for now, it is completely safe to cast the byte to the enum
+        // in the future, this WILL cause a problem -
+        // the ReadInt is preferred in the future.
+        // as for now, this is a non issue.
+
 		[MethodImpl(Inlining)]
 		public ConnectionScope ReadConnectionScope()
             => (ConnectionScope)_data[_i++];
 
 		[MethodImpl(Inlining)]
 		public MessageType ReadMessageType()
-            => (MessageType)Read7BitEncodedInt();
+            => (MessageType)_data[_i++];
 
 		[MethodImpl(Inlining)]
 		public string ReadString()
@@ -40,7 +45,7 @@ namespace EEUniverse.Library
 
 		[MethodImpl(Inlining)]
 		public ReadOnlySpan<byte> ReadBytes()
-            => ReadBytes(Read7BitEncodedInt());
+            => ReadBytes(ReadInt());
 
 		[MethodImpl(Inlining)]
 		public double ReadDouble()
@@ -61,7 +66,7 @@ namespace EEUniverse.Library
 		}
 
 		[MethodImpl(Inlining)]
-		public int Read7BitEncodedInt()
+		public int ReadInt()
 		{
 			// basically copied and pasted from https://source.dot.net/#System.Private.CoreLib/shared/System/IO/BinaryReader.cs,587
 

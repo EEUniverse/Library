@@ -142,6 +142,110 @@ namespace EEUniverse.Library
 			return size;
 		}
 
+		/// <summary>
+		/// Convert a message into a stream of bytes.<br />Use with extreme caution.
+		/// </summary>
+		public static Span<byte> SerializeFast(Message message)
+        {
+			var target = new Span<byte>(new byte[EstimateSize(message)]);
+			var writer = new MessageWriter(target);
+
+			writer.Write(message.Scope);
+			writer.Write(message.Type);
+
+            for (var i = 0; i < message.Count; i++)
+            {
+				var data = message[i];
+
+				switch (data)
+				{
+					case bool @bool: writer.Write(@bool ? _patternBooleanTrue : _patternBooleanFalse); break;
+
+					case int @int:
+					{
+						writer.Write(@int < 0 ? _patternIntNeg : _patternIntPos);
+						writer.Write(@int < 0 ? -(@int + 1) : @int);
+					}
+					break;
+
+					case double @double:
+					{
+						writer.Write(_patternDouble);
+						writer.Write(@double);
+					}
+					break;
+
+					case string @string:
+					{
+						writer.Write(_patternString);
+						writer.Write(@string);
+					}
+					break;
+
+					case byte[] bytes:
+					{
+						writer.Write(_patternBytes);
+						writer.Write(bytes);
+					}
+					break;
+
+					case IDictionary<string, object> dict:
+					{
+						writer.Write(_patternObject);
+
+                        foreach(var (key, value) in dict)
+						{
+							if (key.Length == _patternObjectEnd) // Until they fix, which will be a breaking change...
+							{
+								throw new InvalidDataException("The specified key in MessageObject is invalid; it must be lower or greater than 8 characters in length.");
+							}
+
+							writer.Write(key);
+                            
+                            // this blatant copying and pasting actually hurts my soul
+                            switch(value)
+							{
+								case bool @bool: writer.Write(@bool ? _patternBooleanTrue : _patternBooleanFalse); break;
+
+								case int @int:
+								{
+									writer.Write(@int < 0 ? _patternIntNeg : _patternIntPos);
+									writer.Write(@int < 0 ? -(@int + 1) : @int);
+								}
+								break;
+
+								case double @double:
+								{
+									writer.Write(_patternDouble);
+									writer.Write(@double);
+								}
+								break;
+
+								case string @string:
+								{
+									writer.Write(_patternString);
+									writer.Write(@string);
+								}
+								break;
+
+								case byte[] bytes:
+								{
+									writer.Write(_patternBytes);
+									writer.Write(bytes);
+								}
+								break;
+							}
+						}
+
+						writer.Write(_patternObjectEnd);
+					}
+					break;
+				}
+			}
+
+			return target;
+		}
+
         /// <summary>
         /// Convert a message into a stream of bytes.<br />Use with caution.
         /// </summary>
@@ -260,8 +364,8 @@ namespace EEUniverse.Library
 				switch (patternType)
 				{
 					case _patternString: obj = reader.ReadString(); break;
-					case _patternIntPos: obj = reader.Read7BitEncodedInt(); break;
-					case _patternIntNeg: obj = -reader.Read7BitEncodedInt(); break;
+					case _patternIntPos: obj = reader.ReadInt(); break;
+					case _patternIntNeg: obj = -reader.ReadInt(); break;
 					case _patternDouble: obj = reader.ReadDouble(); break;
 					case _patternBooleanTrue: obj = true; break;
 					case _patternBooleanFalse: obj = false; break;
@@ -280,8 +384,8 @@ namespace EEUniverse.Library
 							switch (reader.ReadByte())
                             {
 								case _patternString: value = reader.ReadString(); break;
-								case _patternIntPos: value = reader.Read7BitEncodedInt(); break;
-								case _patternIntNeg: value = -reader.Read7BitEncodedInt(); break;
+								case _patternIntPos: value = reader.ReadInt(); break;
+								case _patternIntNeg: value = -reader.ReadInt(); break;
 								case _patternDouble: value = reader.ReadDouble(); break;
 								case _patternBooleanTrue: value = true; break;
 								case _patternBooleanFalse: value = false; break;
