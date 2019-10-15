@@ -69,56 +69,10 @@ namespace EEUniverse.Library
 								case double _: size += sizeof(double); break;
 
 								case bool _: break;
-
-								// actually don't know if we even need to handle byte & sbyte & ushort & short :v
-								// so they'll be placed at the bottom with the least chance of being hit
-
-								// if there are bugs, oh well :)
-								// none of this code below is tested :)
-
-								case byte @byte:
-								{
-									size += 2;
-
-									// 7 bit encoded int thing
-									if (@byte >= 0b1_000_0000)
-									{
-										size++;
-									}
-								}
-								break;
-
-								case sbyte val: size += GetVarIntSize(val); break;
-								case short val: size += GetVarIntSize(val); break;
-								case ushort val: size += GetVarIntSize(val); break;
-								case uint val: size += GetVarIntSize((int)val); break;
 							}
 						}
 					}
 					break;
-
-                    // actually don't know if we even need to handle byte & sbyte & ushort & short :v
-                    // so they'll be placed at the bottom with the least chance of being hit
-
-                    // if there are bugs, oh well :)
-                    // none of this code below is tested :)
-
-					case byte @byte:
-					{
-						size += 2;
-
-                        // 7 bit encoded int thing
-                        if (@byte >= 0b1_000_0000)
-                        {
-							size++;
-						}
-					}
-					break;
-
-					case sbyte val: size += GetVarIntSize(val); break;
-					case short val: size += GetVarIntSize(val); break;
-					case ushort val: size += GetVarIntSize(val); break;
-					case uint val: size += GetVarIntSize((int)val); break;
 				}
 			}
 
