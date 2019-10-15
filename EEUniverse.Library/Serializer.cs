@@ -147,15 +147,14 @@ namespace EEUniverse.Library
                     {
 						var messageObject = new MessageObject();
 
-                        while ((patternType = reader.ReadByte()) != _patternObjectEnd)
+                        while (reader.ReadByte() != _patternObjectEnd)
                         {
 							reader.BackUp();
 
 							var key = reader.ReadString();
 							object value;
 
-							patternType = reader.ReadByte();
-							switch (patternType)
+							switch (reader.ReadByte())
                             {
 								case _patternString: value = reader.ReadString(); break;
 								case _patternIntPos: value = reader.Read7BitEncodedInt(); break;
