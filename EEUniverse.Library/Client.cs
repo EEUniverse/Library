@@ -47,6 +47,11 @@ namespace EEUniverse.Library
         /// <summary>
         /// Establishes a connection with the server and starts listening for messages.
         /// </summary>
+        public void Connect() => ConnectAsync().GetAwaiter().GetResult();
+
+        /// <summary>
+        /// Establishes a connection with the server and starts listening for messages.
+        /// </summary>
         public async Task ConnectAsync()
         {
             await _socket.ConnectAsync(new Uri($"{MultiplayerHost}/?a={_token}"), CancellationToken.None);
@@ -54,6 +59,15 @@ namespace EEUniverse.Library
             _messageReceiverThread = new Thread(async () => await MessageReceiver());
             _messageReceiverThread.Start();
         }
+
+        /// <summary>
+        /// Sends a message to the server, synchronously.
+        /// </summary>
+        /// <param name="scope">The scope of the message.</param>
+        /// <param name="type">The type of the message.</param>
+        /// <param name="data">An array of data to be sent.</param>
+        public void Send(ConnectionScope scope, MessageType type, params object[] data)
+            => SendAsync(new Message(scope, type, data)).GetAwaiter().GetResult;
 
         /// <summary>
         /// Sends an asynchronous message to the server.
@@ -64,10 +78,23 @@ namespace EEUniverse.Library
         public async Task SendAsync(ConnectionScope scope, MessageType type, params object[] data) => await SendAsync(new Message(scope, type, data));
 
         /// <summary>
+        /// Sends a message to the server, synchronously.
+        /// </summary>
+        /// <param name="message">The message to send.</param>
+        public void Send(Message message)
+            => SendAsync(message).GetAwaiter().GetResult;
+
+        /// <summary>
         /// Sends an asynchronous message to the server.
         /// </summary>
         /// <param name="message">The message to send.</param>
         public async Task SendAsync(Message message) => await SendRawAsync(Serializer.Serialize(message));
+
+        /// <summary>
+        /// Sends a message to the server, synchronously.<br />Use with caution.
+        /// </summary>
+        /// <param name="bytes">The buffer containing the message to be sent.</param>
+        public void SendRaw(ArraySegment<byte> bytes) => SendRawAsync(bytes).GetAwaiter().GetResult();
 
         /// <summary>
         /// Sends an asynchronous message to the server.<br />Use with caution.
