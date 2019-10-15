@@ -8,7 +8,7 @@ namespace EEUniverse.Library
     /// <summary>
     /// Represents an Everybody Edits Universe™ message.
     /// </summary>
-    public class Message : IEnumerable
+    public class Message : IEnumerable<object>
     {
         /// <summary>
         /// Represents the scope this message was received in.
@@ -50,9 +50,7 @@ namespace EEUniverse.Library
             _data = new List<object>(data);
         }
 
-        /// <summary>
-        /// Returns an IEnumerator for the data.
-        /// </summary>
+        IEnumerator<object> IEnumerable<object>.GetEnumerator() => _data.GetEnumerator();
         public IEnumerator GetEnumerator() => _data.GetEnumerator();
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 

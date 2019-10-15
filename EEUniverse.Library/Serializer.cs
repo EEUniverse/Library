@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Text;
 
 namespace EEUniverse.Library
 {
@@ -18,6 +19,128 @@ namespace EEUniverse.Library
         private const byte _patternBytes = 6;
         private const byte _patternObject = 7;
         private const byte _patternObjectEnd = 8;
+
+        public static int EstimateSize(Message message)
+        {
+			// currently, a connectionscope & message type can't be above 1 byte when 7 bit encoded.
+			// this optimization is safe, currently.
+			int size = 2
+
+            // we add the message count because every item in the message requires a byte for the pattern type
+            // that way we don't have to do size++ in the loop
+                + message.Count;
+
+            for (var i = 0; i < message.Count; i++)
+            {
+				var data = message[i];
+
+				switch (data)
+				{
+					case int val: size += GetVarIntSize(val < 0 ? -val : val); break;
+					case string val: size += GetVarIntSize(val.Length) + Encoding.UTF8.GetByteCount(val); break;
+					case byte[] val: size += GetVarIntSize(val.Length) + val.Length; break;
+
+					case double _: size += sizeof(double); break;
+
+					case bool _: break;
+
+					case IDictionary<string, object> dict:
+                    {
+						// there's a pattern byte for each value
+						size += dict.Count
+
+                        // there's a byte to end the pattern
+                            + 1;
+
+                        foreach(var kvp in dict)
+                        {
+							// write string
+							size += GetVarIntSize(kvp.Key.Length) + Encoding.UTF8.GetByteCount(kvp.Key);
+
+                            // TODO: i literally just copied and pasted this
+                            // this is literally awful D:
+
+                            switch(kvp.Value)
+							{
+								case int val: size += GetVarIntSize(val < 0 ? -val : val); break;
+								case string val: size += GetVarIntSize(val.Length) + Encoding.UTF8.GetByteCount(val); break;
+								case byte[] val: size += GetVarIntSize(val.Length) + val.Length; break;
+
+								case double _: size += sizeof(double); break;
+
+								case bool _: break;
+
+								// actually don't know if we even need to handle byte & sbyte & ushort & short :v
+								// so they'll be placed at the bottom with the least chance of being hit
+
+								// if there are bugs, oh well :)
+								// none of this code below is tested :)
+
+								case byte @byte:
+								{
+									size += 2;
+
+									// 7 bit encoded int thing
+									if (@byte >= 0b1_000_0000)
+									{
+										size++;
+									}
+								}
+								break;
+
+								case sbyte val: size += GetVarIntSize(val); break;
+								case short val: size += GetVarIntSize(val); break;
+								case ushort val: size += GetVarIntSize(val); break;
+								case uint val: size += GetVarIntSize((int)val); break;
+							}
+						}
+					}
+					break;
+
+                    // actually don't know if we even need to handle byte & sbyte & ushort & short :v
+                    // so they'll be placed at the bottom with the least chance of being hit
+
+                    // if there are bugs, oh well :)
+                    // none of this code below is tested :)
+
+					case byte @byte:
+					{
+						size += 2;
+
+                        // 7 bit encoded int thing
+                        if (@byte >= 0b1_000_0000)
+                        {
+							size++;
+						}
+					}
+					break;
+
+					case sbyte val: size += GetVarIntSize(val); break;
+					case short val: size += GetVarIntSize(val); break;
+					case ushort val: size += GetVarIntSize(val); break;
+					case uint val: size += GetVarIntSize((int)val); break;
+				}
+			}
+
+			return size;
+		}
+
+        private static int GetVarIntSize(int value)
+	    {
+			// nearly copied from https://source.dot.net/#System.Private.CoreLib/shared/System/IO/BinaryWriter.cs,456
+
+			// Write out an int 7 bits at a time.  The high bit of the byte,
+			// when on, tells reader to continue reading more bytes.
+			uint v = (uint)value;   // support negative numbers
+			int size = 1;
+			while (v >= 0x80)
+			{
+				size++;
+				v >>= 7;
+			}
+
+			return size;
+		}
 
         /// <summary>
         /// Convert a message into a stream of bytes.<br />Use with caution.
