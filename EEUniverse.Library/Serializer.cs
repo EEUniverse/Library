@@ -309,7 +309,7 @@ namespace EEUniverse.Library
 
 			var argData = new List<object>();
 
-			do
+			while (reader.IsDataLeft())
 			{
 				var patternType = reader.ReadByte();
 
@@ -360,7 +360,6 @@ namespace EEUniverse.Library
 
 				argData.Add(obj);
 			}
-			while (reader.IsDataLeft());
 
 			return new Message(scope, type, argData.ToArray());
 		}
