@@ -116,6 +116,75 @@ namespace EEUniverse.Library
             return memStream.ToArray();
         }
 
+		/// <summary>
+		/// Deserialize a stream of bytes into a message.<br />Use with extreme caution.
+		/// </summary>
+		public static Message Deserialize(ReadOnlySpan<byte> data)
+        {
+			var reader = new MessageReader(data);
+
+			var scope = reader.ReadConnectionScope();
+			var type = reader.ReadMessageType();
+
+			var argData = new List<object>();
+
+			do
+			{
+				var patternType = reader.ReadByte();
+
+				object obj;
+
+				switch (patternType)
+				{
+					case _patternString: obj = reader.ReadString(); break;
+					case _patternIntPos: obj = reader.Read7BitEncodedInt(); break;
+					case _patternIntNeg: obj = -reader.Read7BitEncodedInt(); break;
+					case _patternDouble: obj = reader.ReadDouble(); break;
+					case _patternBooleanTrue: obj = true; break;
+					case _patternBooleanFalse: obj = false; break;
+					case _patternBytes: obj = reader.ReadBytes().ToArray(); break;
+					case _patternObject:
+                    {
+						var messageObject = new MessageObject();
+
+                        while ((patternType = reader.ReadByte()) != _patternObjectEnd)
+                        {
+							reader.BackUp();
+
+							var key = reader.ReadString();
+							object value;
+
+							patternType = reader.ReadByte();
+							switch (patternType)
+                            {
+								case _patternString: value = reader.ReadString(); break;
+								case _patternIntPos: value = reader.Read7BitEncodedInt(); break;
+								case _patternIntNeg: value = -reader.Read7BitEncodedInt(); break;
+								case _patternDouble: value = reader.ReadDouble(); break;
+								case _patternBooleanTrue: value = true; break;
+								case _patternBooleanFalse: value = false; break;
+								case _patternBytes: value = reader.ReadBytes().ToArray(); break;
+
+								default: throw new InvalidDataException($"Invalid pattern type {patternType} in MessageObject.");
+							}
+
+							messageObject.Add(key, value);
+						}
+
+						obj = messageObject;
+					}
+					break;
+
+					default: throw new InvalidDataException($"Invalid pattern type {patternType}.");
+				}
+
+				argData.Add(obj);
+			}
+			while (reader.IsDataLeft());
+
+			return new Message(scope, type, argData.ToArray());
+		}
+
         /// <summary>
         /// Deserialize a stream of bytes into a message.<br />Use with caution.
         /// </summary>

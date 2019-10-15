@@ -20,9 +20,11 @@ namespace EEUniverse.Library
 			_i = 0;
 		}
 
+		[MethodImpl(Inlining)]
+		public void BackUp() => _i--;
+
         [MethodImpl(Inlining)]
-		public bool IsDataLeft()
-            => _i < _data.Length;
+		public bool IsDataLeft() => _i < _data.Length;
 
 		[MethodImpl(Inlining)]
 		public ConnectionScope ReadConnectionScope()
@@ -63,7 +65,6 @@ namespace EEUniverse.Library
 		{
 			// basically copied and pasted from https://source.dot.net/#System.Private.CoreLib/shared/System/IO/BinaryReader.cs,587
 
-			var i = 0;
 			var count = 0;
 			var shift = 0;
 			byte b;
@@ -75,14 +76,13 @@ namespace EEUniverse.Library
 					ThrowBadFormat();
 				}
 
-				b = _data[i++];
+				b = _data[_i++];
 
 				count |= (b & 0b0111_1111) << shift;
 				shift += 7;
 			}
 			while ((b & 0b1000_0000) != 0b0000_0000);
 
-			_data = _data.Slice(i);
 			return count;
 		}
 
