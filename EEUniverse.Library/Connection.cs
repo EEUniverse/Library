@@ -76,5 +76,11 @@ namespace EEUniverse.Library
         /// </summary>
         /// <param name="buffer">The buffer containing the message to be sent.</param>
         public async Task SendRawAsync(ArraySegment<byte> buffer) => await _client.SendRawAsync(buffer);
+
+        /// <summary>
+        /// Sends an asynchronous message to the server.<br />Use with caution.
+        /// </summary>
+        /// <param name="bytes">The buffer containing the message to be sent.</param>
+        public ValueTask SendRawAsync(ReadOnlyMemory<byte> bytes) => _client.SendRawAsync(bytes);
     }
 }
