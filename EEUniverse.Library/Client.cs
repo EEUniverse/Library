@@ -61,19 +61,19 @@ namespace EEUniverse.Library
         /// <param name="scope">The scope of the message.</param>
         /// <param name="type">The type of the message.</param>
         /// <param name="data">An array of data to be sent.</param>
-        public async Task SendAsync(ConnectionScope scope, MessageType type, params object[] data) => await SendAsync(new Message(scope, type, data));
+        public Task SendAsync(ConnectionScope scope, MessageType type, params object[] data) => SendAsync(new Message(scope, type, data));
 
         /// <summary>
         /// Sends an asynchronous message to the server.
         /// </summary>
         /// <param name="message">The message to send.</param>
-        public async Task SendAsync(Message message) => await SendRawAsync(Serializer.Serialize(message));
+        public Task SendAsync(Message message) => SendRawAsync(Serializer.Serialize(message));
 
         /// <summary>
         /// Sends an asynchronous message to the server.<br />Use with caution.
         /// </summary>
         /// <param name="bytes">The buffer containing the message to be sent.</param>
-        public async Task SendRawAsync(ArraySegment<byte> bytes) => await _socket.SendAsync(bytes, WebSocketMessageType.Binary, true, CancellationToken.None);
+        public Task SendRawAsync(ArraySegment<byte> bytes) => _socket.SendAsync(bytes, WebSocketMessageType.Binary, true, CancellationToken.None);
 
         /// <summary>
         /// Creates a connection with the lobby.
