@@ -12,6 +12,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="EEUniverse.LoginExtensions" Version="0.*.*" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\EEUniverse.Library\EEUniverse.Library.csproj" />
   </ItemGroup>
 

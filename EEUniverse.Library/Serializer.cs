@@ -65,10 +65,6 @@ namespace EEUniverse.Library
                     case IDictionary<string, object> oDict: {
                             writer.Write(_patternObject);
                             foreach (var kvp in oDict) {
-                                if (kvp.Key.Length == 8) // Until they fix, which will be a breaking change...
-                                    throw new InvalidDataException("The specified key in MessageObject is invalid; it must be lower or greater than 8 characters in length.");
-
-                                writer.Write(kvp.Key);
                                 switch (kvp.Value) {
                                     case bool oBool: writer.Write(oBool ? _patternBooleanTrue : _patternBooleanFalse); break;
 
@@ -103,6 +99,8 @@ namespace EEUniverse.Library
 
                                     default: throw new NotSupportedException($"Data type {kvp.Value.GetType().Name} in MessageObject not supported.");
                                 }
+
+                                writer.Write(kvp.Key);
                             }
 
                             writer.Write(_patternObjectEnd);
@@ -146,22 +144,24 @@ namespace EEUniverse.Library
                             while (stream.ReadByte() != _patternObjectEnd) {
                                 stream.BaseStream.Position--;
 
-                                var objectIndex = stream.ReadString();
+                                object value;
                                 switch (stream.ReadByte()) {
-                                    case _patternString: objectArgs.Add(objectIndex, stream.ReadString()); break;
-                                    case _patternIntPos: objectArgs.Add(objectIndex, stream.Read7BitEncodedInt()); break;
-                                    case _patternIntNeg: objectArgs.Add(objectIndex, -stream.Read7BitEncodedInt() - 1); break;
-                                    case _patternDouble: objectArgs.Add(objectIndex, BitConverter.ToDouble(stream.ReadBytes(8), 0)); break;
-                                    case _patternBooleanFalse: objectArgs.Add(objectIndex, false); break;
-                                    case _patternBooleanTrue: objectArgs.Add(objectIndex, true); break;
+                                    case _patternString: value = stream.ReadString(); break;
+                                    case _patternIntPos: value = stream.Read7BitEncodedInt(); break;
+                                    case _patternIntNeg: value = -stream.Read7BitEncodedInt() - 1; break;
+                                    case _patternDouble: value = BitConverter.ToDouble(stream.ReadBytes(8), 0); break;
+                                    case _patternBooleanFalse: value = false; break;
+                                    case _patternBooleanTrue: value = true; break;
                                     case _patternBytes: {
                                             var length = stream.Read7BitEncodedInt();
-                                            objectArgs.Add(objectIndex, stream.ReadBytes(length));
+                                            value = stream.ReadBytes(length);
                                         }
                                         break;
 
                                     default: throw new InvalidDataException($"Invalid pattern type {patternType} in MessageObject.");
                                 }
+
+                                objectArgs.Add(stream.ReadString(), value);
                             }
 
                             argData.Add(objectArgs);

@@ -115,6 +115,8 @@ namespace EEUniverse.Library
                         WebSocketError = ex.WebSocketErrorCode,
                         Reason = ex.Message
                     });
+
+                    return;
                 }
             }
 
