@@ -69,22 +69,22 @@ namespace EEUniverse.Library
         /// <param name="message">The message to send.</param>
         public async Task SendAsync(Message message) => await SendRawAsync(Serializer.Serialize(message));
 
-		/// <summary>
-		/// Sends an asynchronous message to the server.<br />Use with caution.
-		/// </summary>
-		/// <param name="bytes">The buffer containing the message to be sent.</param>
-		public async Task SendRawAsync(ArraySegment<byte> bytes) => await _socket.SendAsync(bytes, WebSocketMessageType.Binary, true, CancellationToken.None);
+        /// <summary>
+        /// Sends an asynchronous message to the server.<br />Use with caution.
+        /// </summary>
+        /// <param name="bytes">The buffer containing the message to be sent.</param>
+        public async Task SendRawAsync(ArraySegment<byte> bytes) => await _socket.SendAsync(bytes, WebSocketMessageType.Binary, true, CancellationToken.None);
 
-		/// <summary>
-		/// Sends an asynchronous message to the server.<br />Use with caution.
-		/// </summary>
-		/// <param name="bytes">The buffer containing the message to be sent.</param>
-		public ValueTask SendRawAsync(ReadOnlyMemory<byte> bytes) => _socket.SendAsync(bytes, WebSocketMessageType.Binary, true, CancellationToken.None);
+        /// <summary>
+        /// Sends an asynchronous message to the server.<br />Use with caution.
+        /// </summary>
+        /// <param name="bytes">The buffer containing the message to be sent.</param>
+        public ValueTask SendRawAsync(ReadOnlyMemory<byte> bytes) => _socket.SendAsync(bytes, WebSocketMessageType.Binary, true, CancellationToken.None);
 
-		/// <summary>
-		/// Creates a connection with the lobby.
-		/// </summary>
-		public Connection CreateLobbyConnection() => new Connection(this, ConnectionScope.Lobby);
+        /// <summary>
+        /// Creates a connection with the lobby.
+        /// </summary>
+        public Connection CreateLobbyConnection() => new Connection(this, ConnectionScope.Lobby);
 
         /// <summary>
         /// Creates a connection with the specified world.
