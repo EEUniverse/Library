@@ -59,6 +59,12 @@ namespace EEUniverse.Library
         public void SendRaw(ArraySegment<byte> buffer) => _ = SendRawAsync(buffer);
 
         /// <summary>
+        /// Sends an asynchronous message to the server.<br />Use with caution.
+        /// </summary>
+        /// <param name="buffer">The buffer containing the message to be sent.</param>
+        public void SendRaw(ReadOnlyMemory<byte> buffer) => SendRawAsync(buffer).GetAwaiter().GetResult();
+
+        /// <summary>
         /// Sends an asynchronous message to the server.
         /// </summary>
         /// <param name="type">The type of the message.</param>
