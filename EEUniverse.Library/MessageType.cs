@@ -29,7 +29,8 @@
         ChatPMTo = 21,
         ChatPMFrom = 22,
         SelfInfo = 23,
-        Save = 24,
+        clear: 24,
+        canGod: 25,
 
         //TODO: Should probably find a better way to implement these.
         //      Also don't know how accurate the names are.
