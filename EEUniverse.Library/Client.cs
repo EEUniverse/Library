@@ -61,7 +61,7 @@ namespace EEUniverse.Library
         }
 
         /// <summary>
-        /// Sends a message to the server, synchronously.
+        /// Sends a message to the server.
         /// </summary>
         /// <param name="scope">The scope of the message.</param>
         /// <param name="type">The type of the message.</param>
@@ -70,7 +70,7 @@ namespace EEUniverse.Library
             => SendAsync(new Message(scope, type, data)).GetAwaiter().GetResult;
 
         /// <summary>
-        /// Sends an asynchronous message to the server.
+        /// Sends a message to the server as an asynchronous operation.
         /// </summary>
         /// <param name="scope">The scope of the message.</param>
         /// <param name="type">The type of the message.</param>
@@ -78,26 +78,26 @@ namespace EEUniverse.Library
         public async Task SendAsync(ConnectionScope scope, MessageType type, params object[] data) => await SendAsync(new Message(scope, type, data));
 
         /// <summary>
-        /// Sends a message to the server, synchronously.
+        /// Sends a message to the server.
         /// </summary>
         /// <param name="message">The message to send.</param>
         public void Send(Message message)
             => SendAsync(message).GetAwaiter().GetResult;
 
         /// <summary>
-        /// Sends an asynchronous message to the server.
+        /// Sends a message to the server as an asynchronous operation.
         /// </summary>
         /// <param name="message">The message to send.</param>
         public async Task SendAsync(Message message) => await SendRawAsync(Serializer.Serialize(message));
 
         /// <summary>
-        /// Sends a message to the server, synchronously.<br />Use with caution.
+        /// Sends a message to the server.<br />Use with caution.
         /// </summary>
         /// <param name="bytes">The buffer containing the message to be sent.</param>
         public void SendRaw(ArraySegment<byte> bytes) => SendRawAsync(bytes).GetAwaiter().GetResult();
 
         /// <summary>
-        /// Sends an asynchronous message to the server.<br />Use with caution.
+        /// Sends a message to the server as an asynchronous operation.<br />Use with caution.
         /// </summary>
         /// <param name="bytes">The buffer containing the message to be sent.</param>
         public async Task SendRawAsync(ArraySegment<byte> bytes) => await _socket.SendAsync(bytes, WebSocketMessageType.Binary, true, CancellationToken.None);
