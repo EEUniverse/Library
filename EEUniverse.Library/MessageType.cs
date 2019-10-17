@@ -59,8 +59,7 @@ namespace EEUniverse.Library
         private static readonly Dictionary<(ConnectionScope scope, MessageType type), string> _names = typeof(MessageType)
             .GetFields()
             .Where(field => field.IsStatic)
-            .ToDictionary
-            (
+            .ToDictionary(
                 field => (GetScope(field), (MessageType)field.GetValue(null)),
                 field => field.Name
             );
