@@ -66,8 +66,7 @@ namespace EEUniverse.Library
         /// <param name="scope">The scope of the message.</param>
         /// <param name="type">The type of the message.</param>
         /// <param name="data">An array of data to be sent.</param>
-        public void Send(ConnectionScope scope, MessageType type, params object[] data)
-            => SendAsync(new Message(scope, type, data)).GetAwaiter().GetResult;
+        public void Send(ConnectionScope scope, MessageType type, params object[] data) => SendAsync(new Message(scope, type, data)).GetAwaiter().GetResult();
 
         /// <summary>
         /// Sends a message to the server as an asynchronous operation.
@@ -81,8 +80,7 @@ namespace EEUniverse.Library
         /// Sends a message to the server.
         /// </summary>
         /// <param name="message">The message to send.</param>
-        public void Send(Message message)
-            => SendAsync(message).GetAwaiter().GetResult;
+        public void Send(Message message) => SendAsync(message).GetAwaiter().GetResult();
 
         /// <summary>
         /// Sends a message to the server as an asynchronous operation.
