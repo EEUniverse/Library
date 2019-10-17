@@ -134,7 +134,7 @@ namespace EEUniverse.Library
         public override string ToString()
         {
             var sb = new StringBuilder();
-            sb.AppendLine($"Scope = {Scope}, Id = {Type}, {Count} entr{(Count == 1 ? "y" : "ies")}, {Serializer.Serialize(this).Length} bytes");
+            sb.AppendLine($"Scope = {Scope}, Id = {Type.ToString(Scope)}, {Count} entr{(Count == 1 ? "y" : "ies")}, {Serializer.Serialize(this).Length} bytes");
 
             for (int i = 0; i < _data.Count; i++) {
                 if (_data[i] is MessageObject mo) {
