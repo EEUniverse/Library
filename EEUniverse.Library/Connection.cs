@@ -44,19 +44,19 @@ namespace EEUniverse.Library
         /// </summary>
         /// <param name="type">The type of the message.</param>
         /// <param name="data">An array of data to be sent.</param>
-        public void Send(MessageType type, params object[] data) => _ = SendAsync(new Message(_scope, type, data));
+        public void Send(MessageType type, params object[] data) => SendAsync(new Message(_scope, type, data)).GetAwaiter().GetResult();
 
         /// <summary>
         /// Sends a message to the server.
         /// </summary>
         /// <param name="message">The message to be sent.</param>
-        public void Send(Message message) => _ = SendRawAsync(Serializer.Serialize(message));
+        public void Send(Message message) => SendRawAsync(Serializer.Serialize(message)).GetAwaiter().GetResult();
 
         /// <summary>
         /// Sends an asynchronous message to the server.<br />Use with caution.
         /// </summary>
         /// <param name="buffer">The buffer containing the message to be sent.</param>
-        public void SendRaw(ArraySegment<byte> buffer) => _ = SendRawAsync(buffer);
+        public void SendRaw(ArraySegment<byte> buffer) => SendRawAsync(buffer).GetAwaiter().GetResult();
 
         /// <summary>
         /// Sends an asynchronous message to the server.
