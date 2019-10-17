@@ -1,40 +1,74 @@
-﻿namespace EEUniverse.Library
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
+
+namespace EEUniverse.Library
 {
     /// <summary>
     /// Represents the type of a message.
     /// </summary>
     public enum MessageType
     {
-        Init = 0,
-        Ping = 1,
-        Pong = 2,
-        Chat = 3,
-        ChatOld = 4,
-        PlaceBlock = 5,
-        PlayerJoin = 6,
-        PlayerExit = 7,
-        PlayerMove = 8,
-        PlayerSmiley = 9,
-        PlayerGod = 10,
-        CanEdit = 11,
-        Meta = 12,
-        ChatInfo = 13,
-        PlayerAdd = 14,
-        ZoneCreate = 15,
-        ZoneDelete = 16,
-        ZoneEdit = 17,
-        ZoneEnter = 18,
-        ZoneExit = 19,
-        LimitedEdit = 20,
-        ChatPMTo = 21,
-        ChatPMFrom = 22,
-        SelfInfo = 23,
-        Save = 24,
+        [Scope(ConnectionScope.None)] SelfInfo = 23,
+
+        [Scope(ConnectionScope.World)] Init = 0,
+        [Scope(ConnectionScope.World)] Ping = 1,
+        [Scope(ConnectionScope.World)] Pong = 2,
+        [Scope(ConnectionScope.World)] Chat = 3,
+        [Scope(ConnectionScope.World)] ChatOld = 4,
+        [Scope(ConnectionScope.World)] PlaceBlock = 5,
+        [Scope(ConnectionScope.World)] PlayerJoin = 6,
+        [Scope(ConnectionScope.World)] PlayerExit = 7,
+        [Scope(ConnectionScope.World)] PlayerMove = 8,
+        [Scope(ConnectionScope.World)] PlayerSmiley = 9,
+        [Scope(ConnectionScope.World)] PlayerGod = 10,
+        [Scope(ConnectionScope.World)] CanEdit = 11,
+        [Scope(ConnectionScope.World)] Meta = 12,
+        [Scope(ConnectionScope.World)] ChatInfo = 13,
+        [Scope(ConnectionScope.World)] PlayerAdd = 14,
+        [Scope(ConnectionScope.World)] ZoneCreate = 15,
+        [Scope(ConnectionScope.World)] ZoneDelete = 16,
+        [Scope(ConnectionScope.World)] ZoneEdit = 17,
+        [Scope(ConnectionScope.World)] ZoneEnter = 18,
+        [Scope(ConnectionScope.World)] ZoneExit = 19,
+        [Scope(ConnectionScope.World)] LimitedEdit = 20,
+        [Scope(ConnectionScope.World)] ChatPMTo = 21,
+        [Scope(ConnectionScope.World)] ChatPMFrom = 22,
+        [Scope(ConnectionScope.World)] Save = 24,
 
         //TODO: Should probably find a better way to implement these.
         //      Also don't know how accurate the names are.
-        RoomConnect = 0,
-        RoomDisconnect = 1,
-        LoadRooms = 2,
+        [Scope(ConnectionScope.Lobby)] RoomConnect = 0,
+        [Scope(ConnectionScope.Lobby)] RoomDisconnect = 1,
+        [Scope(ConnectionScope.Lobby)] LoadRooms = 2,
+    }
+
+    [AttributeUsage(AttributeTargets.Field, AllowMultiple = false)]
+    internal sealed class ScopeAttribute : Attribute
+    {
+        public ConnectionScope Scope { get; }
+
+        public ScopeAttribute(ConnectionScope scope) => Scope = scope;
+    }
+
+    public static class MessageTypeExtensions
+    {
+        private static ConnectionScope GetScope(FieldInfo field) => field.GetCustomAttribute<ScopeAttribute>().Scope;
+
+        private static readonly Dictionary<(ConnectionScope scope, MessageType type), string> _names = typeof(MessageType)
+            .GetFields()
+            .Where(field => field.IsStatic)
+            .ToDictionary
+            (
+                field => (GetScope(field), (MessageType)field.GetValue(null)),
+                field => field.Name
+            );
+
+        /// <summary>
+        /// Returns a string that represents the current message.
+        /// </summary>
+        /// <param name="connectionScope">The scope of the message.</param>
+        public static string ToString(this MessageType messageType, ConnectionScope connectionScope) => _names[(connectionScope, messageType)];
     }
 }
