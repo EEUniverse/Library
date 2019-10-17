@@ -63,18 +63,18 @@ namespace EEUniverse.Library
         /// </summary>
         /// <param name="type">The type of the message.</param>
         /// <param name="data">An array of data to be sent.</param>
-        public async Task SendAsync(MessageType type, params object[] data) => await SendRawAsync(Serializer.Serialize(new Message(_scope, type, data)));
+        public Task SendAsync(MessageType type, params object[] data) => SendRawAsync(Serializer.Serialize(new Message(_scope, type, data)));
 
         /// <summary>
         /// Sends an asynchronous message to the server.
         /// </summary>
         /// <param name="message">The message to be sent.</param>
-        public async Task SendAsync(Message message) => await SendRawAsync(Serializer.Serialize(message));
+        public Task SendAsync(Message message) => SendRawAsync(Serializer.Serialize(message));
 
         /// <summary>
         /// Sends an asynchronous message to the server.<br />Use with caution.
         /// </summary>
         /// <param name="buffer">The buffer containing the message to be sent.</param>
-        public async Task SendRawAsync(ArraySegment<byte> buffer) => await _client.SendRawAsync(buffer);
+        public Task SendRawAsync(ArraySegment<byte> buffer) => _client.SendRawAsync(buffer);
     }
 }
