@@ -35,7 +35,8 @@ namespace EEUniverse.Library
         [Scope(ConnectionScope.World)] LimitedEdit = 20,
         [Scope(ConnectionScope.World)] ChatPMTo = 21,
         [Scope(ConnectionScope.World)] ChatPMFrom = 22,
-        [Scope(ConnectionScope.World)] Save = 24,
+        [Scope(ConnectionScope.World)] Clear = 24,
+        [Scope(ConnectionScope.World)] CanGod = 25,
 
         //TODO: Should probably find a better way to implement these.
         //      Also don't know how accurate the names are.
@@ -68,6 +69,13 @@ namespace EEUniverse.Library
         /// Returns a string that represents the current message.
         /// </summary>
         /// <param name="connectionScope">The scope of the message.</param>
-        public static string ToString(this MessageType messageType, ConnectionScope connectionScope) => _names[(connectionScope, messageType)];
+        public static string ToString(this MessageType messageType, ConnectionScope connectionScope)
+        {
+            var key = (connectionScope, messageType);
+            if (_names.ContainsKey(key))
+                return _names[key];
+
+            return ((int)messageType).ToString();
+        }
     }
 }
