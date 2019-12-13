@@ -37,12 +37,16 @@ namespace EEUniverse.Library
         [Scope(ConnectionScope.World)] ChatPMFrom = 22,
         [Scope(ConnectionScope.World)] Clear = 24,
         [Scope(ConnectionScope.World)] CanGod = 25,
+        [Scope(ConnectionScope.World)] BgColor = 26,
+        [Scope(ConnectionScope.World)] Won = 27,
+        [Scope(ConnectionScope.World)] Reset = 28,
 
         //TODO: Should probably find a better way to implement these.
         //      Also don't know how accurate the names are.
         [Scope(ConnectionScope.Lobby)] RoomConnect = 0,
         [Scope(ConnectionScope.Lobby)] RoomDisconnect = 1,
         [Scope(ConnectionScope.Lobby)] LoadRooms = 2,
+        [Scope(ConnectionScope.Lobby)] LoadStats = 3,
     }
 
     [AttributeUsage(AttributeTargets.Field, AllowMultiple = false)]
