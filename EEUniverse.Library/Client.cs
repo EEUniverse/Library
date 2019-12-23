@@ -120,10 +120,10 @@ namespace EEUniverse.Library
         /// <summary>
         /// An asynchronous listener to receive incomming messages from the Everybody Edits Universe™ server.
         /// </summary>
-        private async Task MessageReceiver() //TODO: improve buffer system..?
+        private async Task MessageReceiver()
         {
-            var tmpBuffer = new Memory<byte>(new byte[MinBuffer]);
-            var ms = new MemoryStream(MinBuffer);
+            var tempBuffer = new Memory<byte>(new byte[MinBuffer]);
+            var memoryStream = new MemoryStream(MinBuffer);
 
             try {
                 while (_socket.State == WebSocketState.Open) {
@@ -131,29 +131,27 @@ namespace EEUniverse.Library
                         ValueWebSocketReceiveResult result;
 
                         do {
-                            result = await _socket.ReceiveAsync(tmpBuffer, default);
+                            result = await _socket.ReceiveAsync(tempBuffer, default).ConfigureAwait(false);
 
                             if (result.MessageType == WebSocketMessageType.Close)
-                            {
                                 goto GRACEFUL_DISCONNECT;
-                            }
 
-                            ms.Write(tmpBuffer.Span.Slice(0, result.Count));
+                            memoryStream.Write(tempBuffer.Span.Slice(0, result.Count));
                         } while (!result.EndOfMessage);
 
-                        ms.SetLength(ms.Position); // we don't want to read previous data
+                        memoryStream.SetLength(memoryStream.Position); // we don't want to read previous data
 
-                        ms.Position = 0; // reset position for reading
-                        var message = Serializer.Deserialize(ms);
-                        ms.Position = 0; // reset position for reuse
+                        memoryStream.Position = 0; // reset position for reading
+                        var message = Serializer.Deserialize(memoryStream);
+                        memoryStream.Position = 0; // reset position for reuse
 
-                        if (ms.Capacity > MaxBuffer) {
+                        if (memoryStream.Capacity > MaxBuffer) {
                             // can't set ms.Capacity to a smaller value
                             // if we're over the maximum capacity, murder it
-                            ms.Dispose();
-                            ms = null;
+                            memoryStream.Dispose();
+                            memoryStream = null;
 
-                            ms = new MemoryStream(MinBuffer);
+                            memoryStream = new MemoryStream(MinBuffer);
                         }
 
                         OnMessage?.Invoke(this, message);
@@ -177,7 +175,7 @@ namespace EEUniverse.Library
                 });
             }
             finally {
-                ms.Dispose();
+                memoryStream.Dispose();
             }
         }
     }
