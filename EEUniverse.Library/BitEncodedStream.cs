@@ -1,4 +1,5 @@
 ﻿using System.IO;
+using System.Text;
 
 namespace EEUniverse.Library
 {
@@ -7,7 +8,7 @@ namespace EEUniverse.Library
     /// </summary>
     internal class BitEncodedStreamReader : BinaryReader
     {
-        internal BitEncodedStreamReader(MemoryStream stream) : base(stream) { }
+        internal BitEncodedStreamReader(MemoryStream stream, bool leaveOpen) : base(stream, Encoding.UTF8, leaveOpen) { }
 
         /// <summary>
         /// Reads in a 32-bit integer in a compressed format.

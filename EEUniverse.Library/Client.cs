@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Net.WebSockets;
 using System.Threading;
 using System.Threading.Tasks;
@@ -26,9 +27,14 @@ namespace EEUniverse.Library
         public string MultiplayerHost { get; private set; } = "wss://game.ee-universe.com";
 
         /// <summary>
-        /// The maximum amount of data the client should try to read before deserializing the message.
+        /// The maximum amount of data the internal MemoryStream buffer can be before it forcilby shrinks itself.
         /// </summary>
         public int MaxBuffer { get; set; } = 1024 * 50; // 51.2 kb
+
+        /// <summary>
+        /// The minimum amount of data the client should allocate before deserializing a message.
+        /// </summary>
+        public int MinBuffer { get; set; } = 4096; // 4 kb
 
         private Thread _messageReceiverThread;
         private readonly ClientWebSocket _socket;
@@ -114,42 +120,58 @@ namespace EEUniverse.Library
         /// <summary>
         /// An asynchronous listener to receive incomming messages from the Everybody Edits Universe™ server.
         /// </summary>
-        private async Task MessageReceiver() //TODO: improve buffer system..?
+        private async Task MessageReceiver()
         {
-            var buffer = new byte[MaxBuffer];
-            var count = 0;
+            var tempBuffer = new Memory<byte>(new byte[MinBuffer]);
+            var memoryStream = new MemoryStream(MinBuffer);
 
-            while (_socket.State == WebSocketState.Open) {
-                try {
-                    var result = await _socket.ReceiveAsync(buffer, default);
-                    if (result.MessageType == WebSocketMessageType.Close)
-                        break;
+            try {
+                while (_socket.State == WebSocketState.Open) {
+                    try {
+                        ValueWebSocketReceiveResult result;
 
-                    count += result.Count;
-                    if (!result.EndOfMessage)
-                        continue;
+                        do {
+                            result = await _socket.ReceiveAsync(tempBuffer, default).ConfigureAwait(false);
+                            if (result.MessageType == WebSocketMessageType.Close)
+                                goto GRACEFUL_DISCONNECT;
 
-                    var bytes = new Span<byte>(buffer)[..count].ToArray();
-                    var message = Serializer.Deserialize(bytes);
-                    OnMessage?.Invoke(this, message);
-                    count = 0;
+                            memoryStream.Write(tempBuffer.Span[..result.Count]);
+                        } while (!result.EndOfMessage);
+
+                        memoryStream.SetLength(memoryStream.Position); // we don't want to read previous data
+
+                        memoryStream.Position = 0; // reset position for reading
+                        var message = Serializer.Deserialize(memoryStream);
+                        memoryStream.Position = 0; // reset position for reuse
+
+                        if (memoryStream.Capacity > MaxBuffer) {
+                            memoryStream.Dispose();
+                            memoryStream = new MemoryStream(MinBuffer);
+                        }
+
+                        OnMessage?.Invoke(this, message);
+                    }
+                    catch (WebSocketException ex) {
+                        OnDisconnect?.Invoke(this, new CloseEventArgs {
+                            WasClean = false,
+                            WebSocketError = ex.WebSocketErrorCode,
+                            Reason = ex.Message
+                        });
+
+                        return;
+                    }
                 }
-                catch (WebSocketException ex) {
-                    OnDisconnect?.Invoke(this, new CloseEventArgs {
-                        WasClean = false,
-                        WebSocketError = ex.WebSocketErrorCode,
-                        Reason = ex.Message
-                    });
 
-                    return;
-                }
+            GRACEFUL_DISCONNECT:
+                OnDisconnect?.Invoke(this, new CloseEventArgs {
+                    WasClean = true,
+                    WebSocketError = WebSocketError.Success,
+                    Reason = "Disconnected gracefully"
+                });
             }
-
-            OnDisconnect?.Invoke(this, new CloseEventArgs {
-                WasClean = true,
-                WebSocketError = WebSocketError.Success,
-                Reason = "Disconnected gracefully"
-            });
+            finally {
+                memoryStream.Dispose();
+            }
         }
     }
 }
