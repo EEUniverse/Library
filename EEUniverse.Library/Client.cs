@@ -132,11 +132,10 @@ namespace EEUniverse.Library
 
                         do {
                             result = await _socket.ReceiveAsync(tempBuffer, default).ConfigureAwait(false);
-
                             if (result.MessageType == WebSocketMessageType.Close)
                                 goto GRACEFUL_DISCONNECT;
 
-                            memoryStream.Write(tempBuffer.Span.Slice(0, result.Count));
+                            memoryStream.Write(tempBuffer.Span[..result.Count]);
                         } while (!result.EndOfMessage);
 
                         memoryStream.SetLength(memoryStream.Position); // we don't want to read previous data
@@ -146,11 +145,7 @@ namespace EEUniverse.Library
                         memoryStream.Position = 0; // reset position for reuse
 
                         if (memoryStream.Capacity > MaxBuffer) {
-                            // can't set ms.Capacity to a smaller value
-                            // if we're over the maximum capacity, murder it
                             memoryStream.Dispose();
-                            memoryStream = null;
-
                             memoryStream = new MemoryStream(MinBuffer);
                         }
 
