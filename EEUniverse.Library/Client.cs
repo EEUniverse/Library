@@ -7,23 +7,13 @@ using System.Threading.Tasks;
 namespace EEUniverse.Library
 {
     /// <summary>
-    /// Provides a client for connecting to Everybody Edits Universe™
+    /// The default implementation for a client connecting to Everybody Edits Universe™
     /// </summary>
-    public class Client
+    public class Client : IClient
     {
-        /// <summary>
-        /// An event that raises when the client receives a message.
-        /// </summary>
         public event EventHandler<Message> OnMessage;
-
-        /// <summary>
-        /// An event that raises when the connection to the server is lost.
-        /// </summary>
         public event EventHandler<CloseEventArgs> OnDisconnect;
 
-        /// <summary>
-        /// The server to connect to.
-        /// </summary>
         public string MultiplayerHost { get; private set; } = "wss://game.ee-universe.com";
 
         /// <summary>
@@ -36,8 +26,9 @@ namespace EEUniverse.Library
         /// </summary>
         public int MinBuffer { get; set; } = 4096; // 4 kb
 
+        public ClientWebSocket Socket { get; }
+
         private Thread _messageReceiverThread;
-        private readonly ClientWebSocket _socket;
         private readonly string _token;
 
         /// <summary>
@@ -46,52 +37,27 @@ namespace EEUniverse.Library
         /// <param name="token">The JWT to connect with.</param>
         public Client(string token)
         {
-            _socket = new ClientWebSocket();
+            Socket = new ClientWebSocket();
             _token = token;
         }
 
-        /// <summary>
-        /// Establishes a connection with the server and starts listening for messages.
-        /// </summary>
-        public void Connect() => ConnectAsync().GetAwaiter().GetResult();
-
-        /// <summary>
-        /// Establishes a connection with the server and starts listening for messages.
-        /// </summary>
         public async Task ConnectAsync()
         {
-            await _socket.ConnectAsync(new Uri($"{MultiplayerHost}/?a={_token}"), CancellationToken.None);
+            await Socket.ConnectAsync(new Uri($"{MultiplayerHost}/?a={_token}"), CancellationToken.None);
 
             _messageReceiverThread = new Thread(async () => await MessageReceiver());
             _messageReceiverThread.Start();
         }
 
-        /// <summary>
-        /// Sends a message to the server.
-        /// </summary>
-        /// <param name="scope">The scope of the message.</param>
-        /// <param name="type">The type of the message.</param>
-        /// <param name="data">An array of data to be sent.</param>
-        public void Send(ConnectionScope scope, MessageType type, params object[] data) => SendAsync(new Message(scope, type, data)).GetAwaiter().GetResult();
+        public async ValueTask DisposeAsync()
+        {
+            // WebSocketException: The remote party closed the WebSocket connection without completing the close handshake.
+            // ^ this is thrown when WebSocketCLoseStatus.NormalClosure is used.
 
-        /// <summary>
-        /// Sends a message to the server as an asynchronous operation.
-        /// </summary>
-        /// <param name="scope">The scope of the message.</param>
-        /// <param name="type">The type of the message.</param>
-        /// <param name="data">An array of data to be sent.</param>
-        public Task SendAsync(ConnectionScope scope, MessageType type, params object[] data) => SendAsync(new Message(scope, type, data));
+            await Socket.CloseAsync(WebSocketCloseStatus.Empty, statusDescription: null, cancellationToken: default).ConfigureAwait(false);
+            Socket.Dispose();
+        }
 
-        /// <summary>
-        /// Sends a message to the server.
-        /// </summary>
-        /// <param name="message">The message to send.</param>
-        public void Send(Message message) => SendAsync(message).GetAwaiter().GetResult();
-
-        /// <summary>
-        /// Sends a message to the server as an asynchronous operation.
-        /// </summary>
-        /// <param name="message">The message to send.</param>
         public Task SendAsync(Message message) => SendRawAsync(Serializer.Serialize(message));
 
         /// <summary>
@@ -104,18 +70,11 @@ namespace EEUniverse.Library
         /// Sends a message to the server as an asynchronous operation.<br />Use with caution.
         /// </summary>
         /// <param name="bytes">The buffer containing the message to be sent.</param>
-        public Task SendRawAsync(ArraySegment<byte> bytes) => _socket.SendAsync(bytes, WebSocketMessageType.Binary, true, CancellationToken.None);
+        public Task SendRawAsync(ArraySegment<byte> bytes) => Socket.SendAsync(bytes, WebSocketMessageType.Binary, true, CancellationToken.None);
 
-        /// <summary>
-        /// Creates a connection with the lobby.
-        /// </summary>
-        public Connection CreateLobbyConnection() => new Connection(this, ConnectionScope.Lobby);
+        public IConnection CreateLobbyConnection() => new Connection(this, ConnectionScope.Lobby);
 
-        /// <summary>
-        /// Creates a connection with the specified world.
-        /// </summary>
-        /// <param name="worldId">The world id to connect to.</param>
-        public Connection CreateWorldConnection(string worldId) => new Connection(this, ConnectionScope.World, worldId);
+        public IConnection CreateWorldConnection(string worldId) => new Connection(this, ConnectionScope.World, worldId);
 
         /// <summary>
         /// An asynchronous listener to receive incomming messages from the Everybody Edits Universe™ server.
@@ -126,12 +85,12 @@ namespace EEUniverse.Library
             var memoryStream = new MemoryStream(MinBuffer);
 
             try {
-                while (_socket.State == WebSocketState.Open) {
+                while (Socket.State == WebSocketState.Open) {
                     try {
                         ValueWebSocketReceiveResult result;
 
                         do {
-                            result = await _socket.ReceiveAsync(tempBuffer, default).ConfigureAwait(false);
+                            result = await Socket.ReceiveAsync(tempBuffer, default).ConfigureAwait(false);
                             if (result.MessageType == WebSocketMessageType.Close)
                                 goto GRACEFUL_DISCONNECT;
 

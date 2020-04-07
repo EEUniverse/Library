@@ -8,7 +8,7 @@ namespace EEUniverse.Library
     /// <summary>
     /// Represents an Everybody Edits Universe™ message.
     /// </summary>
-    public class Message : IEnumerable
+    public class Message : IEnumerable<object>
     {
         /// <summary>
         /// Represents the scope this message was received in.
@@ -55,6 +55,7 @@ namespace EEUniverse.Library
         /// </summary>
         public IEnumerator GetEnumerator() => _data.GetEnumerator();
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+        IEnumerator<object> IEnumerable<object>.GetEnumerator() => ((IEnumerable<object>)_data).GetEnumerator();
 
         /// <summary>
         /// Sets data at the given index to the given object.
@@ -66,7 +67,7 @@ namespace EEUniverse.Library
         /// <summary>
         /// Adds one or more objects to the existing message data.
         /// </summary>
-        /// <param name="value">The object to add.</param>
+        /// <param name="values">The objects to add.</param>
         public void Add(params object[] values) => _data.AddRange(values);
 
         /// <summary>
