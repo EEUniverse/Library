@@ -10,13 +10,14 @@
     <PackageProjectUrl>https://github.com/EEUniverse/Library</PackageProjectUrl>
     <RepositoryUrl>https://github.com/EEUniverse/Library</RepositoryUrl>
     <PackageTags>bot</PackageTags>
-    <AssemblyVersion>1.0.4.0</AssemblyVersion>
-    <FileVersion>1.0.3.0</FileVersion>
-    <Version>1.0.4</Version>
+    <AssemblyVersion>1.0.6.0</AssemblyVersion>
+    <FileVersion>1.0.6.0</FileVersion>
+    <Version>1.0.6</Version>
     <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
     <SignAssembly>false</SignAssembly>
     <PackageId>EEUniverse.Library</PackageId>
     <Product>EEUniverse.Library</Product>
+    <DocumentationFile>EEUniverse.Library.xml</DocumentationFile>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
@@ -28,5 +29,9 @@
     <DebugType>pdbonly</DebugType>
     <DebugSymbols>true</DebugSymbols>
   </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="EEUniverse.Library.xml" />
+  </ItemGroup>
 
 </Project>

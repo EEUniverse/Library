@@ -40,6 +40,9 @@ namespace EEUniverse.Library
         [Scope(ConnectionScope.World)] BgColor = 26,
         [Scope(ConnectionScope.World)] Won = 27,
         [Scope(ConnectionScope.World)] Reset = 28,
+        [Scope(ConnectionScope.World)] Notify = 29,
+        [Scope(ConnectionScope.World)] Teleport = 30,
+        [Scope(ConnectionScope.World)] Effect = 31,
 
         //TODO: Should probably find a better way to implement these.
         //      Also don't know how accurate the names are.
@@ -72,6 +75,7 @@ namespace EEUniverse.Library
         /// <summary>
         /// Returns a string that represents the current message.
         /// </summary>
+        /// <param name="messageType">The type of the message.</param>
         /// <param name="connectionScope">The scope of the message.</param>
         public static string ToString(this MessageType messageType, ConnectionScope connectionScope)
         {

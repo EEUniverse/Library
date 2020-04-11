@@ -131,14 +131,22 @@ namespace EEUniverse.Library
         /// <summary>
         /// Deserialize a stream of bytes into a message.<br />Use with caution.
         /// </summary>
-        public static Message Deserialize(byte[] data)
+        [Obsolete("Please  use '" + nameof(Deserialize) + "(" + nameof(MemoryStream) + " memoryStream)' to deserialize messages.")]
+        public static Message Deserialize(byte[] data) => Deserialize(new MemoryStream(data));
+
+        /// <summary>
+        /// Deserialize a stream of bytes into a message.<br />Use with caution.
+        /// </summary>
+        public static Message Deserialize(MemoryStream memoryStream)
         {
-            using var stream = new BitEncodedStreamReader(new MemoryStream(data));
+            // if `leaveOpen` is left false, this will dispose the memory stream once the BitEncodedStreamReader is disposed.
+            // we don't want to dispose the memory stream because we continually reuse it for reading
+            using var stream = new BitEncodedStreamReader(memoryStream, true);
             var scope = (ConnectionScope)stream.ReadByte();
             var type = (MessageType)stream.Read7BitEncodedInt();
 
             var argData = new List<object>();
-            while (stream.BaseStream.Position < data.Length) {
+            while (stream.BaseStream.Position < memoryStream.Length) {
                 var patternType = stream.ReadByte();
                 switch (patternType) {
                     case _patternString: argData.Add(stream.ReadString()); break;
