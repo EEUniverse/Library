@@ -75,6 +75,7 @@ namespace EEUniverse.Library
         /// <summary>
         /// Returns a string that represents the current message.
         /// </summary>
+        /// <param name="messageType">The type of the message.</param>
         /// <param name="connectionScope">The scope of the message.</param>
         public static string ToString(this MessageType messageType, ConnectionScope connectionScope)
         {

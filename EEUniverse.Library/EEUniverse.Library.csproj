@@ -17,6 +17,7 @@
     <SignAssembly>false</SignAssembly>
     <PackageId>EEUniverse.Library</PackageId>
     <Product>EEUniverse.Library</Product>
+    <DocumentationFile>EEUniverse.Library.xml</DocumentationFile>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
@@ -28,5 +29,9 @@
     <DebugType>pdbonly</DebugType>
     <DebugSymbols>true</DebugSymbols>
   </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="EEUniverse.Library.xml" />
+  </ItemGroup>
 
 </Project>
