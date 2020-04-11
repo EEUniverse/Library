@@ -88,7 +88,7 @@ namespace EEUniverse.Library
         /// <summary>
         /// Adds one or more objects to the existing message data.
         /// </summary>
-        /// <param name="value">The object to add.</param>
+        /// <param name="values">The objects to add.</param>
         public void Add(params object[] values)
         {
             EnsureValidMessageTypes(values);
@@ -200,8 +200,7 @@ namespace EEUniverse.Library
         [Conditional("DEBUG")]
         private static void EnsureValidMessageTypes(IEnumerable<object> data, bool allowDictionary = true)
         {
-            foreach (var entry in data)
-            {
+            foreach (var entry in data) {
                 EnsureValidMessageType(entry, allowDictionary);
             }
         }
@@ -220,10 +219,9 @@ namespace EEUniverse.Library
                 || entry is ReadOnlyMemory<byte>
                 || (allowDictionary ? entry is IDictionary<string, object> : false);
 
-            Debug.Assert(isSerializeable, $"Data entry is not serializeable (type: {entry.GetType()}) (value: {entry.ToString()})");
+            Debug.Assert(isSerializeable, $"Data entry is not serializeable (type: {entry.GetType()}, value: {entry})");
 
-            if (entry is IDictionary<string, object> dictionary)
-            {
+            if (entry is IDictionary<string, object> dictionary) {
                 EnsureValidMessageTypes(dictionary.Values, false);
             }
         }
