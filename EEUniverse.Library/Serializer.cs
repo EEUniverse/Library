@@ -62,6 +62,13 @@ namespace EEUniverse.Library
                         }
                         break;
 
+                    case ReadOnlyMemory<byte> oRom: {
+                            writer.Write(_patternBytes);
+                            writer.Write7BitEncodedInt(oRom.Length);
+                            writer.Write(oRom.Span);
+                        }
+                        break;
+
                     case IDictionary<string, object> oDict: {
                             writer.Write(_patternObject);
                             foreach (var kvp in oDict) {
@@ -94,6 +101,13 @@ namespace EEUniverse.Library
                                             writer.Write(_patternBytes);
                                             writer.Write7BitEncodedInt(oBytes.Length);
                                             writer.Write(oBytes);
+                                        }
+                                        break;
+
+                                    case ReadOnlyMemory<byte> oRom: {
+                                            writer.Write(_patternBytes);
+                                            writer.Write7BitEncodedInt(oRom.Length);
+                                            writer.Write(oRom.Span);
                                         }
                                         break;
 

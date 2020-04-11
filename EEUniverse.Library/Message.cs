@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Text;
 
 namespace EEUniverse.Library
@@ -47,6 +48,7 @@ namespace EEUniverse.Library
             Scope = scope;
             Type = type;
 
+            EnsureValidMessageTypes(data);
             _data = new List<object>(data);
         }
 
@@ -61,13 +63,21 @@ namespace EEUniverse.Library
         /// </summary>
         /// <param name="index">The index where the data should be written to.</param>
         /// <param name="value">The value to write.</param>
-        public void Set(int index, object value) => _data[index] = value;
+        public void Set(int index, object value)
+        {
+            EnsureValidMessageType(value);
+            _data[index] = value;
+        }
 
         /// <summary>
         /// Adds one or more objects to the existing message data.
         /// </summary>
         /// <param name="value">The object to add.</param>
-        public void Add(params object[] values) => _data.AddRange(values);
+        public void Add(params object[] values)
+        {
+            EnsureValidMessageTypes(values);
+            _data.AddRange(values);
+        }
 
         /// <summary>
         /// Gets an object at a given index.
@@ -160,6 +170,37 @@ namespace EEUniverse.Library
                 }
 
                 return value.ToString();
+            }
+        }
+
+        [Conditional("DEBUG")]
+        private static void EnsureValidMessageTypes(IEnumerable<object> data, bool allowDictionary = true)
+        {
+            foreach (var entry in data)
+            {
+                EnsureValidMessageType(entry, allowDictionary);
+            }
+        }
+
+        [Conditional("DEBUG")]
+        private static void EnsureValidMessageType(object entry, bool allowDictionary = true)
+        {
+            var isSerializeable = entry is bool
+                || entry is byte
+                || entry is sbyte
+                || entry is short
+                || entry is int
+                || entry is double
+                || entry is string
+                || entry is byte[]
+                || entry is ReadOnlyMemory<byte>
+                || (allowDictionary ? entry is IDictionary<string, object> : false);
+
+            Debug.Assert(isSerializeable, "Data entry should be serializeable.");
+
+            if (entry is IDictionary<string, object> dictionary)
+            {
+                EnsureValidMessageTypes(dictionary.Values, false);
             }
         }
     }
