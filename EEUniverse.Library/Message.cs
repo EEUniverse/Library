@@ -53,6 +53,21 @@ namespace EEUniverse.Library
         }
 
         /// <summary>
+        /// Initializes a new message.
+        /// </summary>
+        /// <param name="scope">The scope of the message.</param>
+        /// <param name="type">The type of the message.</param>
+        /// <param name="data">The data of the message.</param>
+        public Message(ConnectionScope scope, MessageType type, List<object> data)
+        {
+            Scope = scope;
+            Type = type;
+
+            EnsureValidMessageTypes(data);
+            Data = data;
+        }
+
+        /// <summary>
         /// Returns an IEnumerator for the data.
         /// </summary>
         public IEnumerator GetEnumerator() => Data.GetEnumerator();
@@ -205,7 +220,7 @@ namespace EEUniverse.Library
                 || entry is ReadOnlyMemory<byte>
                 || (allowDictionary ? entry is IDictionary<string, object> : false);
 
-            Debug.Assert(isSerializeable, "Data entry should be serializeable.");
+            Debug.Assert(isSerializeable, $"Data entry is not serializeable (type: {entry.GetType()}) (value: {entry.ToString()})");
 
             if (entry is IDictionary<string, object> dictionary)
             {
