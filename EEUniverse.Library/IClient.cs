@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 namespace EEUniverse.Library
 {
 	/// <summary>
-	/// Provides a client for connecting to Everybody Edits Universe™
+	/// Provides a client for connecting to the Everybody Edits Universe™ servers
 	/// </summary>
 	public interface IClient : IAsyncDisposable
     {

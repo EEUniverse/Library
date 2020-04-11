@@ -26,6 +26,9 @@ namespace EEUniverse.Library
         /// </summary>
         public int MinBuffer { get; set; } = 4096; // 4 kb
 
+        /// <summary>
+        /// The underlying socket of the client
+        /// </summary>
         public ClientWebSocket Socket { get; }
 
         private Thread _messageReceiverThread;

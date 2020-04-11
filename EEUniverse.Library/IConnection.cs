@@ -3,8 +3,14 @@ using System.Threading.Tasks;
 
 namespace EEUniverse.Library
 {
-	public interface IConnection
+    /// <summary>
+    /// Provides a connection for interacting with the Everybody Edits Universe™ servers
+    /// </summary>
+    public interface IConnection
     {
+        /// <summary>
+        /// An event that raises when the client receives a message with the assigned scope.
+        /// </summary>
         event EventHandler<Message> OnMessage;
 
         /// <summary>

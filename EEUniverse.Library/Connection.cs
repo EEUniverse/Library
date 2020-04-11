@@ -3,22 +3,16 @@ using System.Threading.Tasks;
 
 namespace EEUniverse.Library
 {
+    /// <summary>
+    /// Provides a default implementation for interacting with the Everybody Edits Universe™ servers
+    /// </summary>
     public class Connection : IConnection
     {
-        /// <summary>
-        /// An event that raises when the client receives a message with the assigned scope.
-        /// </summary>
         public event EventHandler<Message> OnMessage;
 
         private readonly IClient _client;
         private readonly ConnectionScope _scope;
 
-        /// <summary>
-        /// Creates a new connection handler for the specified scope.
-        /// </summary>
-        /// <param name="client">The underlying client of this connection.</param>
-        /// <param name="scope">The scope of the connection.<br />This is what the connection listens to in the OnMessage EventHandler.</param>
-        /// <param name="worldId">The world ID to connect to.<br />This should only be filled when creating a connection with the 'World' scope.</param>
         public Connection(IClient client, ConnectionScope scope, string worldId = "")
         {
             _client = client;
