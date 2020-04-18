@@ -14,7 +14,7 @@ namespace EEUniverse.Library
         public event EventHandler<Message> OnMessage;
         public event EventHandler<CloseEventArgs> OnDisconnect;
 
-        public string MultiplayerHost { get; private set; } = "wss://game.ee-universe.com";
+        public string MultiplayerHost { get; set; } = "wss://game.ee-universe.com";
 
         /// <summary>
         /// The maximum amount of data the internal MemoryStream buffer can be before it forcilby shrinks itself.
