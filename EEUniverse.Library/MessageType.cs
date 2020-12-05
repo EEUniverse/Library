@@ -43,6 +43,10 @@ namespace EEUniverse.Library
         [Scope(ConnectionScope.World)] Notify = 29,
         [Scope(ConnectionScope.World)] Teleport = 30,
         [Scope(ConnectionScope.World)] Effect = 31,
+        [Scope(ConnectionScope.World)] SwitchLocal = 32,
+        [Scope(ConnectionScope.World)] SwitchGlobal = 33,
+        [Scope(ConnectionScope.World)] CoinGold = 34,
+        [Scope(ConnectionScope.World)] CoinBlue = 35,
 
         //TODO: Should probably find a better way to implement these.
         //      Also don't know how accurate the names are.

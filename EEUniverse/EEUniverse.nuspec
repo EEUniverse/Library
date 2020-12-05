@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2012/06/nuspec.xsd">
   <metadata>
     <id>EEUniverse</id>
-    <version>2.0.1</version>
+    <version>2.0.2</version>
     <authors>Jesse</authors>
     <owners>Jesse</owners>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
@@ -14,7 +14,7 @@
 	<tags>bot</tags>
     <repository url="https://github.com/EEUniverse" />
     <dependencies>
-        <dependency id="EEUniverse.Library" version="2.0.1" />
+        <dependency id="EEUniverse.Library" version="2.0.2" />
         <dependency id="EEUniverse.LoginExtensions" version="0.0.3" />
     </dependencies>
   </metadata>

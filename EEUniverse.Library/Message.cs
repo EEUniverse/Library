@@ -217,7 +217,7 @@ namespace EEUniverse.Library
                 || entry is string
                 || entry is byte[]
                 || entry is ReadOnlyMemory<byte>
-                || (allowDictionary ? entry is IDictionary<string, object> : false);
+                || (allowDictionary && entry is IDictionary<string, object>);
 
             Debug.Assert(isSerializeable, $"Data entry is not serializeable (type: {entry.GetType()}, value: {entry})");
 
